@@ -1,4 +1,4 @@
-PHP Reverse Shell — NZRXHX
+simple PHP Reverse Shell — NZRXHX
 
 # Features
 
