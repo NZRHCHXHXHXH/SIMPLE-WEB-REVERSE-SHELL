@@ -1,6 +1,6 @@
 simple PHP Reverse Shell — NZRXHX
 
-# Features
+## Features
 
 - Fully functional reverse shell over TCP
 - Compatible with Linux and Windows (auto-detects shell)
@@ -38,7 +38,7 @@ http://target.com/shell.php
 
 Optional: TLS (SSL) Support
 
-# If using a TLS listener:
+## If using a TLS listener:
 
 ```bash
 ncat --ssl -lvnp 443
